@@ -52,6 +52,8 @@ contract Election {
     }
 
     function finish() public restricted {
+        require(started);
+        require(!finished);
         finished = true;
     }
 
