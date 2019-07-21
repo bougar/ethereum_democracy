@@ -36,9 +36,7 @@ beforeEach(async function() {
   );
 });
 
-
 describe('Voting', function() {
-  this.timeout(6000);
   it('deploys a factory and a election', () => {
     assert.ok(factory.options.address);
     assert.ok(election.options.address);
@@ -59,7 +57,7 @@ describe('Voting', function() {
     assert(candidate.name == 'Alice');
   });
 
-  it('no election manager can add Candidate', async () => {
+  it('only election manager can add Candidate', async () => {
     try {
       await election.methods.addCandidate('Alice', 'crypto').send({
         from: accounts[1]
@@ -69,4 +67,132 @@ describe('Voting', function() {
       assert.ok(err);
     }
   });
+
+  it('commit election', async () => {
+    await election.methods.commit().send({
+      from: accounts[0]
+    });
+    started = await election.methods.started().call()
+    assert(started);
+    try {
+      await election.methods.commit().send({
+        from: accounts[0]
+      });
+    } catch(err) {
+      assert.ok(err)
+    }
+
+  });
+
+  it('only manager can commit election', async () => {
+    try {
+      await election.methods.commit().send({
+        from: accounts[1]
+      });
+      assert(false)
+    } catch(err) {
+      assert.ok(err)
+    }
+  });
+
+  it('finish election', async () => {
+    await election.methods.commit().send({
+      from: accounts[0]
+    });
+    started = await election.methods.started().call()
+    assert(started);
+
+    await election.methods.finish().send({
+      from: accounts[0]
+    });
+    finished = await election.methods.finished().call()
+    assert(finished);
+    try {
+      await election.methods.finish().send({
+        from: accounts[0]
+      });
+    } catch(err) {
+      assert.ok(err)
+    }
+  });
+
+  it('only manager can finish election', async () => {
+    await election.methods.commit().send({
+      from: accounts[0]
+    });
+    try {
+      await election.methods.finish().send({
+        from: accounts[1]
+      });
+      assert(false)
+    } catch(err) {
+      assert.ok(err)
+    }
+  });
+
+  it('vote to a candidate', async () => {
+    await election.methods.addCandidate('Bob', 'Description').send({
+      from: accounts[0],
+      gas: '1000000'
+    });
+    await election.methods.commit().send({
+      from: accounts[0]
+    });
+    started = await election.methods.started().call()
+    assert(started);
+    await election.methods.vote(0).send({
+      from: accounts[1]
+    });
+    const candidate = await election.methods.candidates(0).call();
+    assert(candidate.voteCount == 1);
+  });
+
+  it('cannot vote more than once', async () => {
+    await election.methods.addCandidate('Bob', 'Description').send({
+      from: accounts[0],
+      gas: '1000000'
+    });
+    await election.methods.commit().send({
+      from: accounts[0]
+    });
+    started = await election.methods.started().call()
+    assert(started);
+    await election.methods.vote(0).send({
+      from: accounts[1]
+    });
+    const candidate = await election.methods.candidates(0).call();
+    assert(candidate.voteCount == 1);
+    try {
+      await election.methods.vote(0).send({
+        from: accounts[1]
+      });
+    } catch (err) {
+      assert(err)
+    }
+  });
+
+  it('cannot vote when finished', async () => {
+    await election.methods.addCandidate('Bob', 'Description').send({
+      from: accounts[0],
+      gas: '1000000'
+    });
+    await election.methods.commit().send({
+      from: accounts[0]
+    });
+    started = await election.methods.started().call()
+    assert(started);
+    await election.methods.finish().send({
+      from: accounts[0]
+    });
+    finished = await election.methods.finished().call()
+    assert(finished)
+    try {
+      await election.methods.vote(0).send({
+        from: accounts[1]
+      });
+    } catch (err) {
+      assert(err)
+    }
+  });
 });
+
