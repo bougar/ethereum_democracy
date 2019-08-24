@@ -78,6 +78,7 @@ describe('Voting', function() {
       await election.methods.commit().send({
         from: accounts[0]
       });
+      assert(false)
     } catch(err) {
       assert.ok(err)
     }
@@ -170,7 +171,94 @@ describe('Voting', function() {
       assert(err)
     }
   });
-
+  it('can set time period', async () => {
+    init = Date.now()
+    finish = init + 3600
+    await election.methods.setPeriod(init, finish).send({
+      from: accounts[0],
+      gas: '1000000'
+    })
+    contract_init = await election.methods.initTime().call();
+    contract_finish = await election.methods.finalTime().call();
+    assert(init == contract_init);
+    assert(finish == contract_finish);
+  });
+  it('only master can set time period', async () => {
+    try {
+      await election.methods.setPeriod(init, finish).send({
+        from: accounts[1],
+        gas: '1000000'
+      })
+      assert(false);
+    } catch(err){
+      assert(err);
+    }
+  });
+  it('cannot set time period when started', async() => {
+    await election.methods.commit().send({
+      from: accounts[0],
+      gas: '1000000'
+    })
+    try {
+      await election.methods.setPeriod(init, finish).send({
+        from: accounts[0],
+        gas: '1000000'
+      })
+      assert(false);
+    } catch(err){
+      assert(err);
+    }
+  });
+  it('cannot set time period lower than one hour', async() => {
+    init = Date.now()
+    finish = init + 3599
+    try {
+      await election.methods.setPeriod(init, finish).send({
+        from: accounts[0],
+        gas: '1000000'
+      })
+      assert(false);
+    } catch(err){
+      assert(err);
+    }
+  });
+  it('cannot set init time period lower than now (take into account eth tolerance)', async() => {
+    init = Date.now() - 901
+    finish = init + 3600
+    try {
+      await election.methods.setPeriod(init, finish).send({
+        from: accounts[0],
+        gas: '1000000'
+      })
+      assert(false);
+    } catch(err){
+      assert(err);
+    }
+  });
+  it('can set only init time', async () => {
+    init = Date.now()
+    finish = 0
+    await election.methods.setPeriod(init, finish).send({
+      from: accounts[0],
+      gas: '1000000'
+    })
+    contract_init = await election.methods.initTime().call();
+    contract_finish = await election.methods.finalTime().call();
+    assert(init == contract_init);
+    assert(finish == contract_finish);
+  });
+  it('can set only final time', async () => {
+    init = 0
+    finish = Date.now() + 3600
+    await election.methods.setPeriod(init, finish).send({
+      from: accounts[0],
+      gas: '1000000'
+    })
+    contract_init = await election.methods.initTime().call();
+    contract_finish = await election.methods.finalTime().call();
+    assert(init == contract_init);
+    assert(finish == contract_finish);
+  });
   it('cannot vote when finished', async () => {
     await election.methods.addCandidate('Bob', 'Description').send({
       from: accounts[0],
