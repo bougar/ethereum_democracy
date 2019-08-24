@@ -25,6 +25,8 @@ contract Election {
     address public electionAuthority;
     mapping(address => bool) public voted;
     uint public voteCount;
+    uint public initTime;
+    uint public finalTime;
     Candidate[] public candidates;
 
     modifier restricted() {
@@ -32,9 +34,20 @@ contract Election {
         _;
     }
 
+    modifier onTime() {
+        require(now > initTime);
+        if (finalTime != 0) {
+            require (now < finalTime);
+        }
+        _;
+    }
+
     function Election(address creator) public {
         electionAuthority = creator;
+        initTime = 0;
+        finalTime = 0;
     }
+
 
     function addCandidate(string name, string description) public restricted {
         require(!started);
@@ -44,6 +57,21 @@ contract Election {
             voteCount: 0
         });
         candidates.push(candidate);
+    }
+
+    function setPeriod(uint _initTime, uint _finalTime) public restricted {
+        require(!started);
+        if (_initTime != 0) {
+            require(_initTime > (now - 900));
+        }
+        if (_finalTime != 0) {
+            require(_finalTime > (now - 900));
+        }
+        if (_finalTime != 0 && _initTime != 0) {
+            require (_finalTime - _initTime >= 3600);
+        }
+        initTime = _initTime;
+        finalTime = _finalTime;
     }
 
     function commit() public restricted {
@@ -57,9 +85,9 @@ contract Election {
         finished = true;
     }
 
-    function vote(uint candidate) public {
-        require(!finished);
+    function vote(uint candidate) public onTime {
         require(started);
+        require(!finished);
         require(!voted[msg.sender]);
         voted[msg.sender]=true;
         candidates[candidate].voteCount++;
