@@ -21,9 +21,9 @@ beforeEach(async function() {
 
   factory = await new web3.eth.Contract(JSON.parse(compiledFactory.interface))
     .deploy({data: '0x' + compiledFactory.bytecode})
-    .send({ from: accounts[0], gas: '1000000' });
+    .send({ from: accounts[0], gas: '3000000' });
 
-  await factory.methods.createElection().send({
+  await factory.methods.createElection('test', 'test election').send({
     from: accounts[0],
     gas: '1000000'
   });
