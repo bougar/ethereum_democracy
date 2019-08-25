@@ -3,8 +3,8 @@ pragma solidity ^0.4.17;
 contract ElectionFactory {
     address[] public elections;
 
-    function createElection() public{
-        address election = new Election(msg.sender);
+    function createElection(string name, string description) public{
+        address election = new Election(msg.sender, name, description);
         elections.push(election);
     }
 
@@ -27,6 +27,8 @@ contract Election {
     uint public voteCount;
     uint public initTime;
     uint public finalTime;
+    string public name;
+    string public description;
     Candidate[] public candidates;
 
     modifier restricted() {
@@ -42,18 +44,20 @@ contract Election {
         _;
     }
 
-    function Election(address creator) public {
+    function Election(address creator, string _name, string _description) public {
+        name = _name;
+        description = _description;
         electionAuthority = creator;
         initTime = 0;
         finalTime = 0;
     }
 
 
-    function addCandidate(string name, string description) public restricted {
+    function addCandidate(string _name, string _description) public restricted {
         require(!started);
         Candidate memory candidate = Candidate({
-            name: name,
-            description: description,
+            name: _name,
+            description: _description,
             voteCount: 0
         });
         candidates.push(candidate);
