@@ -1,14 +1,20 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.5.11;
 
 contract ElectionFactory {
+    mapping(address => bool) public electionExist;
+    mapping(string => address) public electionNames;
     address[] public elections;
 
-    function createElection(string name, string description) public{
-        address election = new Election(msg.sender, name, description);
+    function createElection(string memory name, string memory description) public returns (string memory) {
+        require(bytes(name).length > 0);
+        require(electionNames[name] == address(0));
+        address election = address(new Election(msg.sender, name, description));
+        electionExist[election] = true;
+        electionNames[name] = election;
         elections.push(election);
     }
 
-    function getElections() public view returns (address[]) {
+    function getElections() public view returns (address[] memory) {
         return elections;
     }
 }
@@ -30,6 +36,7 @@ contract Election {
     string public name;
     string public description;
     Candidate[] public candidates;
+    uint public numCandidates;
 
     modifier restricted() {
         require(msg.sender == electionAuthority);
@@ -44,7 +51,7 @@ contract Election {
         _;
     }
 
-    function Election(address creator, string _name, string _description) public {
+    constructor(address creator, string memory _name, string memory _description) public {
         name = _name;
         description = _description;
         electionAuthority = creator;
@@ -53,15 +60,17 @@ contract Election {
     }
 
 
-    function addCandidate(string _name, string _description) public restricted {
+    function addCandidate(string memory _name, string memory _description) public restricted {
         require(!started);
         Candidate memory candidate = Candidate({
             name: _name,
             description: _description,
             voteCount: 0
         });
+        numCandidates ++;
         candidates.push(candidate);
     }
+
 
     function setPeriod(uint _initTime, uint _finalTime) public restricted {
         require(!started);
