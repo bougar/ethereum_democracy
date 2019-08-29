@@ -19,8 +19,8 @@ beforeEach(async function() {
   this.timeout(60000);
   accounts = await web3.eth.getAccounts();
 
-  factory = await new web3.eth.Contract(JSON.parse(compiledFactory.interface))
-    .deploy({data: '0x' + compiledFactory.bytecode})
+  factory = await new web3.eth.Contract(compiledFactory.abi)
+    .deploy({data: '0x' + compiledFactory.evm.bytecode.object})
     .send({ from: accounts[0], gas: '3000000' });
 
   await factory.methods.createElection('test', 'test election').send({
@@ -31,7 +31,7 @@ beforeEach(async function() {
   [electionAddress] = await factory.methods.getElections().call();
 
   election = await new web3.eth.Contract(
-    JSON.parse(compiledElection.interface),
+    compiledElection.abi,
     electionAddress
   );
 });
