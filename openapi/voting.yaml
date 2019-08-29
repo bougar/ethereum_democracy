@@ -47,6 +47,13 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
     post:
+      requestBody:
+        description: Options to create the election
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateElection'
       summary: Create an election
       operationId: createElection
       tags:
@@ -57,12 +64,7 @@ paths:
           content:
             application/json:
               schema:
-                required:
-                  - election_id
-                properties:
-                  election_id:
-                    type: integer
-                    format: int32
+                $ref: "#/components/schemas/Election"
         '401':
           description: Unauthorized
           content:
@@ -288,6 +290,20 @@ components:
         votes:
           type: integer
           format: int64
+    CreateCandidate:
+      required:
+        - account
+        - name
+        - pkey
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        account:
+          type: string
+        pkey:
+          type: string
     Election:
       required:
         - id
@@ -298,6 +314,28 @@ components:
         name:
           type: string
         description:
+          type: string
+        candidates:
+          type: array
+          items:
+            $ref: "#/components/schemas/Candidate"
+    CreateElection:
+      required:
+        - name
+        - account
+        - pkey
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        candidates:
+          type: array
+          items:
+            $ref: "#/components/schemas/CreateCandidate"
+        account:
+          type: string
+        pkey:
           type: string
     Elections:
       type: array

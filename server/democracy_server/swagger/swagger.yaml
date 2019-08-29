@@ -1,0 +1,423 @@
+openapi: 3.0.0
+info:
+  title: 'Ethereum Voting'
+  license:
+    name: gpl
+  version: 1.0.0
+servers:
+  -
+    url: 'http://localhost:8080/v1'
+paths:
+  /elections:
+    get:
+      tags:
+        - elections
+      summary: 'List elections'
+      operationId: list_elections
+      parameters:
+        -
+          name: limit
+          in: query
+          description: 'How many items to return at one time (max 100)'
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: 'List of elections'
+          headers:
+            x-next:
+              description: 'A link to the next page of responses'
+              style: simple
+              explode: false
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Elections'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: 'Unexpected error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-openapi-router-controller: democracy_server.controllers.elections_controller
+    post:
+      tags:
+        - elections
+      summary: 'Create an election'
+      operationId: create_election
+      requestBody:
+        description: 'Options to create the election'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateElection'
+        required: true
+      responses:
+        '201':
+          description: 'ID of the created election'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Election'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: 'unexpected error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-openapi-router-controller: democracy_server.controllers.elections_controller
+  '/elections/{electionId}':
+    get:
+      tags:
+        - elections
+      summary: 'Lookup election'
+      operationId: show_election_by_id
+      parameters:
+        -
+          name: electionId
+          in: path
+          description: 'The id of the election to retrieve'
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'Election information'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Election'
+        '401':
+          description: 'Access to election is not Authorized'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'Election not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: 'unexpected error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-openapi-router-controller: democracy_server.controllers.elections_controller
+  '/elections/{electionId}/candidates':
+    get:
+      tags:
+        - candidates
+      summary: 'List candidates'
+      operationId: list_election_candidates
+      parameters:
+        -
+          name: electionId
+          in: path
+          description: 'Id of the election'
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'List of candidates'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Candidate'
+        '401':
+          description: 'Not Authorized'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: 'unexpected error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-openapi-router-controller: democracy_server.controllers.candidates_controller
+  '/elections/{electionId}/candidates/{candidateId}':
+    get:
+      tags:
+        - candidates
+      summary: 'Lookup Candidate'
+      operationId: lookup_candidate
+      parameters:
+        -
+          name: electionId
+          in: path
+          description: 'Id of the election'
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        -
+          name: candidateId
+          in: path
+          description: 'Id of the candidate'
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 'Candidate information'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Candidate'
+        '401':
+          description: 'Not Authorized'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: 'unexpected error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-openapi-router-controller: democracy_server.controllers.candidates_controller
+  '/elections/{electionId}/candidates/{candidateId}/votes':
+    get:
+      tags:
+        - votes
+      summary: 'Get votes for a candidate'
+      operationId: get_candidate_votes
+      parameters:
+        -
+          name: electionId
+          in: path
+          description: 'Id of the election'
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        -
+          name: candidateId
+          in: path
+          description: 'Id of the candidate'
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 'Vote loaded on the system'
+          content:
+            application/json:
+              schema:
+                required:
+                  - votes
+                properties:
+                  votes:
+                    type: integer
+                    format: int64
+                example:
+                  votes: 0
+                x-content-type: application/json
+        '401':
+          description: 'Not Authorized'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'Election or candidate not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: 'unexpected error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-openapi-router-controller: democracy_server.controllers.votes_controller
+    post:
+      tags:
+        - votes
+      summary: 'Vote for a candidate'
+      operationId: create_candidate_vote
+      parameters:
+        -
+          name: electionId
+          in: path
+          description: 'Id of the election'
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: string
+        -
+          name: candidateId
+          in: path
+          description: 'Id of the candidate'
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: integer
+      requestBody:
+        description: 'Params to vote a candidate'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateVote'
+        required: true
+      responses:
+        '201':
+          description: 'Vote loaded on the system'
+        '401':
+          description: 'Not Authorized or user already voted'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'Election or candidate not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: 'unexpected error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-openapi-router-controller: democracy_server.controllers.votes_controller
+components:
+  schemas:
+    Candidate:
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+        votes:
+          type: integer
+          format: int64
+      example:
+        name: name
+        description: description
+        votes: 6
+        id: 0
+    CreateCandidate:
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+    Election:
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        candidates:
+          type: array
+          items:
+            $ref: '#/components/schemas/Candidate'
+      example:
+        candidates:
+          -
+            name: name
+            description: description
+            votes: 6
+            id: 0
+          -
+            name: name
+            description: description
+            votes: 6
+            id: 0
+        name: name
+        description: description
+        id: id
+    CreateElection:
+      required:
+        - account
+        - name
+        - pkey
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        candidates:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateCandidate'
+        account:
+          type: string
+        pkey:
+          type: string
+    Elections:
+      type: array
+      items:
+        $ref: '#/components/schemas/Election'
+    CreateVote:
+      required:
+        - account
+        - pkey
+      properties:
+        account:
+          type: string
+        pkey:
+          type: string
+    Error:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+
