@@ -50,9 +50,9 @@ def create_candidate_vote(election_id, candidate_id):  # noqa: E501
         )
         return error, 404
     if connexion.request.is_json:
-        info = connexion.request.get_json()
+        voter = connexion.request.get_json()
 
-    has_voted = contract.call('voted', [info['account']])
+    has_voted = contract.call('voted', [voter['account']])
     if has_voted:
         error = Error(
             code=6,
@@ -60,7 +60,9 @@ def create_candidate_vote(election_id, candidate_id):  # noqa: E501
         )
         return error, 401
 
-    contract.send('vote', info['account'], info['pkey'], [candidate_id])
+    contract.send('vote', voter['account'], voter['pkey'], [candidate_id])
+
+    return None, 204
 
 
 def get_candidate_votes(election_id, candidate_id):  # noqa: E501

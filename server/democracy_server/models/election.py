@@ -15,34 +15,29 @@ class Election(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, id: str=None, name: str=None, description: str=None, candidates: List[Candidate]=None):  # noqa: E501
+    def __init__(self, id: str=None, name: str=None, candidates: List[Candidate]=None):  # noqa: E501
         """Election - a model defined in Swagger
 
         :param id: The id of this Election.  # noqa: E501
         :type id: str
         :param name: The name of this Election.  # noqa: E501
         :type name: str
-        :param description: The description of this Election.  # noqa: E501
-        :type description: str
         :param candidates: The candidates of this Election.  # noqa: E501
         :type candidates: List[Candidate]
         """
         self.swagger_types = {
             'id': str,
             'name': str,
-            'description': str,
             'candidates': List[Candidate]
         }
 
         self.attribute_map = {
             'id': 'id',
             'name': 'name',
-            'description': 'description',
             'candidates': 'candidates'
         }
         self._id = id
         self._name = name
-        self._description = description
         self._candidates = candidates
 
     @classmethod
@@ -101,27 +96,6 @@ class Election(Model):
             raise ValueError("Invalid value for `name`, must not be `None`")  # noqa: E501
 
         self._name = name
-
-    @property
-    def description(self) -> str:
-        """Gets the description of this Election.
-
-
-        :return: The description of this Election.
-        :rtype: str
-        """
-        return self._description
-
-    @description.setter
-    def description(self, description: str):
-        """Sets the description of this Election.
-
-
-        :param description: The description of this Election.
-        :type description: str
-        """
-
-        self._description = description
 
     @property
     def candidates(self) -> List[Candidate]:

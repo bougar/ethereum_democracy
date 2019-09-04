@@ -14,27 +14,20 @@ class CreateCandidate(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, name: str=None, description: str=None, account: str=None, pkey: str=None):  # noqa: E501
+    def __init__(self, name: str=None):  # noqa: E501
         """CreateCandidate - a model defined in Swagger
 
         :param name: The name of this CreateCandidate.  # noqa: E501
         :type name: str
-        :param description: The description of this CreateCandidate.  # noqa: E501
-        :type description: str
         """
         self.swagger_types = {
-            'name': str,
-            'description': str,
+            'name': str
         }
 
         self.attribute_map = {
-            'name': 'name',
-            'description': 'description',
+            'name': 'name'
         }
         self._name = name
-        self._description = description
-        self._account = account
-        self._pkey = pkey
 
     @classmethod
     def from_dict(cls, dikt) -> 'CreateCandidate':
@@ -69,24 +62,3 @@ class CreateCandidate(Model):
             raise ValueError("Invalid value for `name`, must not be `None`")  # noqa: E501
 
         self._name = name
-
-    @property
-    def description(self) -> str:
-        """Gets the description of this CreateCandidate.
-
-
-        :return: The description of this CreateCandidate.
-        :rtype: str
-        """
-        return self._description
-
-    @description.setter
-    def description(self, description: str):
-        """Sets the description of this CreateCandidate.
-
-
-        :param description: The description of this CreateCandidate.
-        :type description: str
-        """
-
-        self._description = description

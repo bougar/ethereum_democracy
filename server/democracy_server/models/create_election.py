@@ -15,13 +15,11 @@ class CreateElection(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, name: str=None, description: str=None, candidates: List[CreateCandidate]=None, account: str=None, pkey: str=None):  # noqa: E501
+    def __init__(self, name: str=None, candidates: List[CreateCandidate]=None, account: str=None, pkey: str=None):  # noqa: E501
         """CreateElection - a model defined in Swagger
 
         :param name: The name of this CreateElection.  # noqa: E501
         :type name: str
-        :param description: The description of this CreateElection.  # noqa: E501
-        :type description: str
         :param candidates: The candidates of this CreateElection.  # noqa: E501
         :type candidates: List[CreateCandidate]
         :param account: The account of this CreateElection.  # noqa: E501
@@ -31,7 +29,6 @@ class CreateElection(Model):
         """
         self.swagger_types = {
             'name': str,
-            'description': str,
             'candidates': List[CreateCandidate],
             'account': str,
             'pkey': str
@@ -39,13 +36,11 @@ class CreateElection(Model):
 
         self.attribute_map = {
             'name': 'name',
-            'description': 'description',
             'candidates': 'candidates',
             'account': 'account',
             'pkey': 'pkey'
         }
         self._name = name
-        self._description = description
         self._candidates = candidates
         self._account = account
         self._pkey = pkey
@@ -83,27 +78,6 @@ class CreateElection(Model):
             raise ValueError("Invalid value for `name`, must not be `None`")  # noqa: E501
 
         self._name = name
-
-    @property
-    def description(self) -> str:
-        """Gets the description of this CreateElection.
-
-
-        :return: The description of this CreateElection.
-        :rtype: str
-        """
-        return self._description
-
-    @description.setter
-    def description(self, description: str):
-        """Sets the description of this CreateElection.
-
-
-        :param description: The description of this CreateElection.
-        :type description: str
-        """
-
-        self._description = description
 
     @property
     def candidates(self) -> List[CreateCandidate]:

@@ -23,7 +23,7 @@ beforeEach(async function() {
     .deploy({data: '0x' + compiledFactory.evm.bytecode.object})
     .send({ from: accounts[0], gas: '3000000' });
 
-  await factory.methods.createElection('test', 'test election').send({
+  await factory.methods.createElection('test').send({
     from: accounts[0],
     gas: '1000000'
   });
@@ -48,7 +48,7 @@ describe('Voting', function() {
   });
 
   it('add Candidate', async () => {
-    await election.methods.addCandidate('Alice', 'crypto').send({
+    await election.methods.addCandidate('Alice').send({
       from: accounts[0],
       gas: '1000000'
     });
@@ -59,7 +59,7 @@ describe('Voting', function() {
 
   it('only election manager can add Candidate', async () => {
     try {
-      await election.methods.addCandidate('Alice', 'crypto').send({
+      await election.methods.addCandidate('Alice').send({
         from: accounts[1]
       });
       assert(false);
@@ -72,8 +72,8 @@ describe('Voting', function() {
     await election.methods.commit().send({
       from: accounts[0]
     });
-    started = await election.methods.started().call()
-    assert(started);
+    commited = await election.methods.commited().call()
+    assert(commited);
     try {
       await election.methods.commit().send({
         from: accounts[0]
@@ -100,8 +100,8 @@ describe('Voting', function() {
     await election.methods.commit().send({
       from: accounts[0]
     });
-    started = await election.methods.started().call()
-    assert(started);
+    commited = await election.methods.commited().call()
+    assert(commited);
 
     await election.methods.finish().send({
       from: accounts[0]
@@ -132,15 +132,15 @@ describe('Voting', function() {
   });
 
   it('vote to a candidate', async () => {
-    await election.methods.addCandidate('Bob', 'Description').send({
+    await election.methods.addCandidate('Bob').send({
       from: accounts[0],
       gas: '1000000'
     });
     await election.methods.commit().send({
       from: accounts[0]
     });
-    started = await election.methods.started().call()
-    assert(started);
+    commited = await election.methods.commited().call()
+    assert(commited);
     await election.methods.vote(0).send({
       from: accounts[1]
     });
@@ -149,15 +149,15 @@ describe('Voting', function() {
   });
 
   it('cannot vote more than once', async () => {
-    await election.methods.addCandidate('Bob', 'Description').send({
+    await election.methods.addCandidate('Bob').send({
       from: accounts[0],
       gas: '1000000'
     });
     await election.methods.commit().send({
       from: accounts[0]
     });
-    started = await election.methods.started().call()
-    assert(started);
+    commited = await election.methods.commited().call()
+    assert(commited);
     await election.methods.vote(0).send({
       from: accounts[1]
     });
@@ -194,7 +194,7 @@ describe('Voting', function() {
       assert(err);
     }
   });
-  it('cannot set time period when started', async() => {
+  it('cannot set time period when commited', async() => {
     await election.methods.commit().send({
       from: accounts[0],
       gas: '1000000'
@@ -260,15 +260,15 @@ describe('Voting', function() {
     assert(finish == contract_finish);
   });
   it('cannot vote when finished', async () => {
-    await election.methods.addCandidate('Bob', 'Description').send({
+    await election.methods.addCandidate('Bob').send({
       from: accounts[0],
       gas: '1000000'
     });
     await election.methods.commit().send({
       from: accounts[0]
     });
-    started = await election.methods.started().call()
-    assert(started);
+    commited = await election.methods.commited().call()
+    assert(commited);
     await election.methods.finish().send({
       from: accounts[0]
     });

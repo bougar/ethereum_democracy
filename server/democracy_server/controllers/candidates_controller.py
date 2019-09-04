@@ -93,7 +93,6 @@ def lookup_candidate(election_id, candidate_id):  # noqa: E501
     candidate_repr = Candidate(
         id=candidate_id,
         name=candidate[0],
-        description=candidate[1],
-        votes=candidate[2]
+        votes=candidate[1]
     )
     return candidate_repr

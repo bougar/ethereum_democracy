@@ -8,9 +8,9 @@ from web3 import Web3
 
 from democracy_server.ethereum.election import Ethereum
 from democracy_server.models.create_election import CreateElection  # noqa: E501
+from democracy_server.models.created_election import CreatedElection
 from democracy_server.models.election import Election  # noqa: E501
 from democracy_server.models.election import Candidate  # noqa: E501
-from democracy_server.models import CreateCandidate  # noqa: E501
 from democracy_server.models.elections import Elections  # noqa: E501
 from democracy_server.models.error import Error  # noqa: E501
 
@@ -29,7 +29,6 @@ def create_election():  # noqa: E501
     account = election.account
     pkey = election.pkey
     name = election.name
-    description = election.description
     candidates = election.candidates
     election = factory.call('electionNames', [name])
     if len(candidates) < 2:
@@ -49,7 +48,7 @@ def create_election():  # noqa: E501
         )
         return error, 400
     try:
-        factory.send('createElection', account, pkey, [name, description])
+        factory.send('createElection', account, pkey, [name])
     except ValueError as transact_error:
         message = str(transact_error)
         error = Error(
@@ -62,11 +61,10 @@ def create_election():  # noqa: E501
     election_abi = current_app.config['ELECTION_ABI']
     contract = Ethereum(provider, election, election_abi)
     for candidate in candidates:
-        contract.send('addCandidate', account, pkey,
-                      [candidate.name, candidate.description])
+        contract.send('addCandidate', account, pkey, [candidate.name])
     contract.send('commit', account, pkey)
 
-    return show_election_by_id(election), 201
+    return CreatedElection(id=election)
 
 
 def list_elections(limit=None):  # noqa: E501
@@ -124,19 +122,16 @@ def show_election_by_id(election_id):  # noqa: E501
     for index in range(candidates_number):
         candidate = contract.call('candidates', [index])
         name = candidate[0]
-        description = candidate[1]
-        votes = candidate[2]
+        votes = candidate[1]
         candidates.append(
             Candidate(
                 name=name,
-                description=description,
                 votes=votes
             )
         )
     election = Election(
         id=election_id,
         name=contract.call('name'),
-        description=contract.call('description'),
         candidates=candidates
     )
     return election

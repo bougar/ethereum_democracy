@@ -1,3 +1,4 @@
+---
 openapi: 3.0.0
 info:
   title: 'Ethereum Voting'
@@ -12,41 +13,23 @@ paths:
     get:
       tags:
         - elections
-      summary: 'List elections'
+      summary: 'Listar elecciones'
       operationId: list_elections
-      parameters:
-        -
-          name: limit
-          in: query
-          description: 'How many items to return at one time (max 100)'
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: integer
-            format: int32
       responses:
         '200':
-          description: 'List of elections'
-          headers:
-            x-next:
-              description: 'A link to the next page of responses'
-              style: simple
-              explode: false
-              schema:
-                type: string
+          description: 'Lista de elecciones con sendas informaciones'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Elections'
         '401':
-          description: Unauthorized
+          description: 'No Autorizado'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         default:
-          description: 'Unexpected error'
+          description: 'Error Inesperado'
           content:
             application/json:
               schema:
@@ -55,10 +38,10 @@ paths:
     post:
       tags:
         - elections
-      summary: 'Create an election'
+      summary: 'Crear una elección'
       operationId: create_election
       requestBody:
-        description: 'Options to create the election'
+        description: 'Parámetros para crear la elección'
         content:
           application/json:
             schema:
@@ -66,19 +49,19 @@ paths:
         required: true
       responses:
         '201':
-          description: 'ID of the created election'
+          description: 'Identificador de la elección creada'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Election'
+                $ref: '#/components/schemas/CreatedElection'
         '401':
-          description: Unauthorized
+          description: 'No Autorizado'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         default:
-          description: 'unexpected error'
+          description: 'Error Inesperado'
           content:
             application/json:
               schema:
@@ -88,13 +71,13 @@ paths:
     get:
       tags:
         - elections
-      summary: 'Lookup election'
+      summary: 'Obtener información de una elección a partir de su identificador'
       operationId: show_election_by_id
       parameters:
         -
           name: electionId
           in: path
-          description: 'The id of the election to retrieve'
+          description: 'El identificador de la elección'
           required: true
           style: simple
           explode: false
@@ -102,25 +85,25 @@ paths:
             type: string
       responses:
         '200':
-          description: 'Election information'
+          description: 'Información de la elección'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Election'
         '401':
-          description: 'Access to election is not Authorized'
+          description: 'No se tiene acceso a la elección especificada'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '404':
-          description: 'Election not found'
+          description: 'No se ha encontrado la elección'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         default:
-          description: 'unexpected error'
+          description: 'Error Inesperado'
           content:
             application/json:
               schema:
@@ -130,13 +113,13 @@ paths:
     get:
       tags:
         - candidates
-      summary: 'List candidates'
+      summary: 'Lisar los candiatos de una elección'
       operationId: list_election_candidates
       parameters:
         -
           name: electionId
           in: path
-          description: 'Id of the election'
+          description: 'Identificador de la elección'
           required: true
           style: simple
           explode: false
@@ -144,19 +127,25 @@ paths:
             type: string
       responses:
         '200':
-          description: 'List of candidates'
+          description: 'Lista de los candidatos'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Candidate'
         '401':
-          description: 'Not Authorized'
+          description: 'No Autorizado'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'No se ha encontrado la elección'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         default:
-          description: 'unexpected error'
+          description: 'Error Inesperado'
           content:
             application/json:
               schema:
@@ -166,13 +155,13 @@ paths:
     get:
       tags:
         - candidates
-      summary: 'Lookup Candidate'
+      summary: 'Obtener la información de un candidato'
       operationId: lookup_candidate
       parameters:
         -
           name: electionId
           in: path
-          description: 'Id of the election'
+          description: 'Identificador de la elección'
           required: true
           style: simple
           explode: false
@@ -181,7 +170,7 @@ paths:
         -
           name: candidateId
           in: path
-          description: 'Id of the candidate'
+          description: 'Identificador del candidato'
           required: true
           style: simple
           explode: false
@@ -189,7 +178,7 @@ paths:
             type: integer
       responses:
         '200':
-          description: 'Candidate information'
+          description: 'Información del candidato'
           content:
             application/json:
               schema:
@@ -200,8 +189,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '404':
+          description: 'No se ha encontrado la elección o el candidato'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         default:
-          description: 'unexpected error'
+          description: 'Error Inesperado'
           content:
             application/json:
               schema:
@@ -217,7 +212,7 @@ paths:
         -
           name: electionId
           in: path
-          description: 'Id of the election'
+          description: 'Identificador de la elección'
           required: true
           style: simple
           explode: false
@@ -226,7 +221,7 @@ paths:
         -
           name: candidateId
           in: path
-          description: 'Id of the candidate'
+          description: 'Identificador del candidato'
           required: true
           style: simple
           explode: false
@@ -234,7 +229,7 @@ paths:
             type: integer
       responses:
         '200':
-          description: 'Vote loaded on the system'
+          description: 'Número de votos del candidato'
           content:
             application/json:
               schema:
@@ -248,19 +243,19 @@ paths:
                   votes: 0
                 x-content-type: application/json
         '401':
-          description: 'Not Authorized'
+          description: 'No Autorizado'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '404':
-          description: 'Election or candidate not found'
+          description: 'Candidato o Elección no encontrado'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         default:
-          description: 'unexpected error'
+          description: 'Error Inesperado'
           content:
             application/json:
               schema:
@@ -269,13 +264,13 @@ paths:
     post:
       tags:
         - votes
-      summary: 'Vote for a candidate'
+      summary: 'Votar por un candidato'
       operationId: create_candidate_vote
       parameters:
         -
           name: electionId
           in: path
-          description: 'Id of the election'
+          description: 'Identificador de la Elección'
           required: true
           style: simple
           explode: false
@@ -284,36 +279,36 @@ paths:
         -
           name: candidateId
           in: path
-          description: 'Id of the candidate'
+          description: 'Identificador del candidato'
           required: true
           style: simple
           explode: false
           schema:
             type: integer
       requestBody:
-        description: 'Params to vote a candidate'
+        description: 'Parámetros necesario para votar a un candidato'
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateVote'
         required: true
       responses:
-        '201':
-          description: 'Vote loaded on the system'
+        '204':
+          description: 'El voto ha sido cargado en el sistema'
         '401':
-          description: 'Not Authorized or user already voted'
+          description: 'El usuario no está autorizado o ya ha votado'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '404':
-          description: 'Election or candidate not found'
+          description: 'Elección o candidato no encontrado'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         default:
-          description: 'unexpected error'
+          description: 'Error inesperado'
           content:
             application/json:
               schema:
@@ -331,23 +326,18 @@ components:
           format: int64
         name:
           type: string
-        description:
-          type: string
         votes:
           type: integer
           format: int64
       example:
-        name: name
-        description: description
-        votes: 6
+        name: 'Partido Único'
+        votes: 4
         id: 0
     CreateCandidate:
       required:
         - name
       properties:
         name:
-          type: string
-        description:
           type: string
     Election:
       required:
@@ -358,8 +348,6 @@ components:
           type: string
         name:
           type: string
-        description:
-          type: string
         candidates:
           type: array
           items:
@@ -367,18 +355,21 @@ components:
       example:
         candidates:
           -
-            name: name
-            description: description
-            votes: 6
+            name: 'Partido Fuerte'
+            votes: 0
             id: 0
           -
-            name: name
-            description: description
-            votes: 6
+            name: 'Partido Inteligente'
+            votes: 0
             id: 0
         name: name
-        description: description
         id: id
+    CreatedElection:
+      required:
+        - id
+      properties:
+        id:
+          type: string
     CreateElection:
       required:
         - account
@@ -386,8 +377,6 @@ components:
         - pkey
       properties:
         name:
-          type: string
-        description:
           type: string
         candidates:
           type: array
@@ -420,4 +409,3 @@ components:
           format: int32
         message:
           type: string
-
