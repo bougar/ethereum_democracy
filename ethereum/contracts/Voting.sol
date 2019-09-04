@@ -5,10 +5,10 @@ contract ElectionFactory {
     mapping(string => address) public electionNames;
     address[] public elections;
 
-    function createElection(string memory name, string memory description) public returns (string memory) {
+    function createElection(string memory name) public {
         require(bytes(name).length > 0);
         require(electionNames[name] == address(0));
-        address election = address(new Election(msg.sender, name, description));
+        address election = address(new Election(msg.sender, name));
         electionExist[election] = true;
         electionNames[name] = election;
         elections.push(election);
@@ -22,11 +22,10 @@ contract ElectionFactory {
 contract Election {
     struct Candidate {
         string name;
-        string description;
         uint voteCount;
     }
 
-    bool public started = false;
+    bool public commited = false;
     bool public finished = false;
     address public electionAuthority;
     mapping(address => bool) public voted;
@@ -34,7 +33,6 @@ contract Election {
     uint public initTime;
     uint public finalTime;
     string public name;
-    string public description;
     Candidate[] public candidates;
     uint public numCandidates;
 
@@ -51,20 +49,18 @@ contract Election {
         _;
     }
 
-    constructor(address creator, string memory _name, string memory _description) public {
+    constructor(address creator, string memory _name) public {
         name = _name;
-        description = _description;
         electionAuthority = creator;
         initTime = 0;
         finalTime = 0;
     }
 
 
-    function addCandidate(string memory _name, string memory _description) public restricted {
-        require(!started);
+    function addCandidate(string memory _name) public restricted {
+        require(!commited);
         Candidate memory candidate = Candidate({
             name: _name,
-            description: _description,
             voteCount: 0
         });
         numCandidates ++;
@@ -73,7 +69,7 @@ contract Election {
 
 
     function setPeriod(uint _initTime, uint _finalTime) public restricted {
-        require(!started);
+        require(!commited);
         if (_initTime != 0) {
             require(_initTime > (now - 900));
         }
@@ -88,18 +84,18 @@ contract Election {
     }
 
     function commit() public restricted {
-        require(!started);
-        started = true;
+        require(!commited);
+        commited = true;
     }
 
     function finish() public restricted {
-        require(started);
+        require(commited);
         require(!finished);
         finished = true;
     }
 
     function vote(uint candidate) public onTime {
-        require(started);
+        require(commited);
         require(!finished);
         require(!voted[msg.sender]);
         voted[msg.sender]=true;
